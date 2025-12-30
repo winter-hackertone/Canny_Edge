@@ -1,0 +1,43 @@
+import cv2
+import numpy as np
+import matplotlib.pyplot as plt
+
+# 이미지 경로
+image_path = "/Users/hawn/Canney_Edge/test/images/CrakWall.jpeg"
+
+# 이미지 로드
+img = cv2.imread(image_path)
+if img is None:
+    raise FileNotFoundError("이미지를 불러올 수 없습니다.")
+
+# 그레이스케일
+gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+# Canny Edge
+edges = cv2.Canny(gray, 100, 200)
+
+# 엣지 개수 계산
+edge_count = np.count_nonzero(edges)
+total_pixels = edges.size
+edge_ratio = (edge_count / total_pixels) * 100
+
+# 콘솔 출력
+print(f"엣지 픽셀 수: {edge_count}")
+print(f"전체 픽셀 수: {total_pixels}")
+print(f"엣지 비율: {edge_ratio:.2f}%")
+
+# 시각화
+plt.figure(figsize=(10, 4))
+
+plt.subplot(1, 2, 1)
+plt.title("Original")
+plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
+plt.axis("off")
+
+plt.subplot(1, 2, 2)
+plt.title(f"Canny Edge\nEdges: {edge_count} ({edge_ratio:.2f}%)")
+plt.imshow(edges, cmap="gray")
+plt.axis("off")
+
+plt.tight_layout()
+plt.show()
