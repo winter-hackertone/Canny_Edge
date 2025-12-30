@@ -1,0 +1,58 @@
+import cv2
+import numpy as np
+
+# 웹캠 입력
+cap = cv2.VideoCapture(0)
+
+EDGE_THRESHOLD = 10.0
+count = 0
+prev_above = False
+
+while True:
+    ret, frame = cap.read()
+    if not ret:
+        break
+
+    # 전처리
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    edges = cv2.Canny(gray, 100, 200)
+
+    # 엣지 비율 계산
+    edge_ratio = (np.count_nonzero(edges) / edges.size) * 100
+    current_above = edge_ratio > EDGE_THRESHOLD
+
+    # 상승 에지 카운트
+    if current_above and not prev_above:
+        count += 1
+
+    prev_above = current_above
+
+    # 정보 표시
+    cv2.putText(
+        edges,
+        f"Edge Ratio: {edge_ratio:.2f}%",
+        (10, 30),
+        cv2.FONT_HERSHEY_SIMPLEX,
+        0.7,
+        255,
+        2
+    )
+
+    cv2.putText(
+        edges,
+        f"Count (>10%): {count}",
+        (10, 60),
+        cv2.FONT_HERSHEY_SIMPLEX,
+        0.7,
+        255,
+        2
+    )
+
+    cv2.imshow("Webcam Canny Test", edges)
+
+    # ESC 종료
+    if cv2.waitKey(1) & 0xFF == 27:
+        break
+
+cap.release()
+cv2.destroyAllWindows()

@@ -1,0 +1,50 @@
+import cv2
+import numpy as np
+
+# 영상 파일 경로
+video_path = "/Users/hawn/Canney_Edge/test/video/Video1.mp4"  # 여기에 영상 파일 경로
+
+cap = cv2.VideoCapture(video_path)
+if not cap.isOpened():
+    raise FileNotFoundError("영상을 열 수 없습니다.")
+
+# FPS 기반 지연 시간 계산
+fps = cap.get(cv2.CAP_PROP_FPS)
+delay = int(1000 / fps) if fps > 0 else 33
+
+while True:
+    ret, frame = cap.read()
+    if not ret:
+        break
+
+    # 그레이스케일
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+    # Canny Edge
+    edges = cv2.Canny(gray, 100, 200)
+
+    # 엣지 비율 계산
+    edge_count = np.count_nonzero(edges)
+    total_pixels = edges.size
+    edge_ratio = (edge_count / total_pixels) * 100
+
+    # 텍스트 표시
+    cv2.putText(
+        edges,
+        f"Edge Ratio: {edge_ratio:.2f}%",
+        (10, 30),
+        cv2.FONT_HERSHEY_SIMPLEX,
+        0.8,
+        255,
+        2
+    )
+
+    # 출력
+    cv2.imshow("Canny Edge (Video)", edges)
+
+    # ESC 종료
+    if cv2.waitKey(delay) & 0xFF == 27:
+        break
+
+cap.release()
+cv2.destroyAllWindows()
